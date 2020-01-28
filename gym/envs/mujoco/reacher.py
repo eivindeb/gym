@@ -3,9 +3,9 @@ from gym import utils
 from gym.envs.mujoco import mujoco_env
 
 class ReacherEnv(mujoco_env.MujocoEnv, utils.EzPickle):
-    def __init__(self):
+    def __init__(self, xml_file="reacher.xml"):
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, 'reacher.xml', 2)
+        mujoco_env.MujocoEnv.__init__(self, xml_file, 2)
 
     def step(self, a):
         vec = self.get_body_com("fingertip")-self.get_body_com("target")
@@ -15,6 +15,7 @@ class ReacherEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.do_simulation(a, self.frame_skip)
         ob = self._get_obs()
         done = False
+
         return ob, reward, done, dict(reward_dist=reward_dist, reward_ctrl=reward_ctrl)
 
     def viewer_setup(self):

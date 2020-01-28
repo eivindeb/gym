@@ -136,14 +136,15 @@ class FetchEnv(robot_env.RobotEnv):
         self.sim.model.site_pos[site_id] = self.goal - sites_offset[0]
         self.sim.forward()
 
-    def _reset_sim(self):
+    def _reset_sim(self, object_xpos=None):
         self.sim.set_state(self.initial_state)
 
         # Randomize start position of object.
         if self.has_object:
-            object_xpos = self.initial_gripper_xpos[:2]
-            while np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2]) < 0.1:
-                object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
+            if object_xpos is None:
+                object_xpos = self.initial_gripper_xpos[:2]
+                while np.linalg.norm(object_xpos - self.initial_gripper_xpos[:2]) < 0.1:
+                    object_xpos = self.initial_gripper_xpos[:2] + self.np_random.uniform(-self.obj_range, self.obj_range, size=2)
             object_qpos = self.sim.data.get_joint_qpos('object0:joint')
             assert object_qpos.shape == (7,)
             object_qpos[:2] = object_xpos

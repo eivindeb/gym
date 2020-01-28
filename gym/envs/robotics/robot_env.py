@@ -27,6 +27,8 @@ class RobotEnv(gym.GoalEnv):
         self.viewer = None
         self._viewers = {}
 
+        self.history_success = []
+
         self.metadata = {
             'render.modes': ['human', 'rgb_array'],
             'video.frames_per_second': int(np.round(1.0 / self.dt))
@@ -64,13 +66,17 @@ class RobotEnv(gym.GoalEnv):
         obs = self._get_obs()
 
         done = False
+        is_success = self._is_success(obs['achieved_goal'], self.goal)
+        self.history_success.append(is_success)
         info = {
-            'is_success': self._is_success(obs['achieved_goal'], self.goal),
+            'is_success': is_success,
+            "success_time_frac": np.mean(self.history_success)
         }
         reward = self.compute_reward(obs['achieved_goal'], self.goal, info)
+
         return obs, reward, done, info
 
-    def reset(self):
+    def reset(self, goal=None, object_xpos=None):
         # Attempt to reset the simulator. Since we randomize initial conditions, it
         # is possible to get into a state with numerical issues (e.g. due to penetration or
         # Gimbel lock) or we may not achieve an initial condition (e.g. an object is within the hand).
@@ -79,9 +85,13 @@ class RobotEnv(gym.GoalEnv):
         super(RobotEnv, self).reset()
         did_reset_sim = False
         while not did_reset_sim:
-            did_reset_sim = self._reset_sim()
-        self.goal = self._sample_goal().copy()
+            did_reset_sim = self._reset_sim(object_xpos=object_xpos)
+        if goal is None:
+            self.goal = self._sample_goal().copy()
+        else:
+            self.goal = goal
         obs = self._get_obs()
+        self.history_success = []
         return obs
 
     def close(self):
@@ -124,6 +134,9 @@ class RobotEnv(gym.GoalEnv):
         self.sim.set_state(self.initial_state)
         self.sim.forward()
         return True
+
+    def get_goal_limits(self):
+        pass
 
     def _get_obs(self):
         """Returns the observation.
