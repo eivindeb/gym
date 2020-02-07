@@ -91,6 +91,12 @@ register(
     max_episode_steps=500,
 )
 
+register(
+    id="Radiator-v0",
+    entry_point="gym.envs.classic_control:RadiatorEnv",
+    max_episode_steps=200
+)
+
 # Box2d
 # ----------------------------------------
 
