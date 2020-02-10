@@ -10,14 +10,18 @@ class PendulumEnv(gym.Env):
         'video.frames_per_second' : 30
     }
 
-    def __init__(self, g=10.0):
+    def __init__(self, g=10.0, pomdp=False):
         self.max_speed=8
         self.max_torque=2.
         self.dt=.05
         self.g = g
         self.viewer = None
+        self.pomdp = pomdp
 
-        high = np.array([1., 1., self.max_speed])
+        if self.pomdp:
+            high = np.array([1., 1.])
+        else:
+            high = np.array([1., 1., self.max_speed])
         self.action_space = spaces.Box(low=-self.max_torque, high=self.max_torque, shape=(1,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-high, high=high, dtype=np.float32)
 
@@ -57,7 +61,10 @@ class PendulumEnv(gym.Env):
 
     def _get_obs(self):
         theta, thetadot = self.state
-        return np.array([np.cos(theta), np.sin(theta), thetadot])
+        if self.pomdp:
+            return np.array([np.cos(theta), np.sin(theta)])
+        else:
+            return np.array([np.cos(theta), np.sin(theta), thetadot])
 
     def render(self, mode='human'):
 
