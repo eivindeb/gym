@@ -50,7 +50,7 @@ class RadiatorEnv(gym.Env):
 
         cur_temp = np.clip(cur_temp, self.min_room_temp, self.max_room_temp)
 
-        costs = 1 / (self.max_room_temp - self.min_room_temp) ** 2 * (cur_temp - desired_temp) ** 2 + np.abs((u - self.last_u)) * 0.01
+        costs = (1 / (self.max_room_temp - self.min_room_temp) ** 2) * (cur_temp - desired_temp) ** 2 + np.abs((u - self.last_u)) * 0.01
 
         self.last_u = u
 
